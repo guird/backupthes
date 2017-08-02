@@ -2,6 +2,7 @@ import numpy as np
 from ridge import ridge, ridge_corr, bootstrap_ridge
 import matplotlib
 import gc
+import sys
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 import tables
@@ -14,13 +15,20 @@ from time import time
 
 starttime = time()
 
+
 TR = 1.0  # seconds
 fps = 15
-layer = 0
-numfeats = 128*128*3
-min_delay = 3  # times TR
+min_delay = 3
+#############SELECT SUBJECT, area####################
+layer = sys.argv[1]
+Subject = sys.argv[2]
+ROI = sys.argv[3]#"v1"
 
-roilist = [ 'v1lh', 'v1rh', 'v2lh' ,'v2rh']
+###############################################
+
+
+
+roilist = [ ROI+'lh', ROI+'rh']#, 'v2lh', 'v2rh']
 
 featuresfolder = "../"
 
@@ -278,6 +286,8 @@ Presp=0
 Rresp =0
 RStim=0
 gc.collect()
+maxalph = np.argmax(np.mean(corr,axis=1))
+np.save( "err" + str(layer) + "corr"+ROI+str(Subject)+".npy", corr[maxalph])
 print "regdone"
 # hkl.dump(corr, "corr"+".hkl")
 #savemat('corrs_pix.mat', {'corr': corr})
@@ -292,7 +302,7 @@ Remember to plot residuals
 #plt.scatter(residuals.flatten(), range(residuals.size))
 #plt.savefig("residualsvim.png")
 #plt.clf()
-maxalph = np.argmax(np.mean(corr,axis=1))
+
 plt.hist(corr[maxalph], bins=(200))
 print "ridge complete"
-plt.savefig("corri.png")
+plt.savefig("err" + str(layer) + "corr"+ROI+str(Subject)+".png")

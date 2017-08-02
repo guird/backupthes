@@ -10,16 +10,16 @@ test_increment = 810
 num_train = 200
 train_increment = 540
 layer = int(sys.argv[1])
-print layer
+print "layer" + str(layer)
 if layer == 0:
     layer_size = 122880
 elif layer==1:
     layer_size = 614400
 elif layer==2:
-    layer_size = 368640
+    layer_size = 245760
 elif layer==3:
     layer_size = 122880
-
+print "layer_size " + str(layer_size)
 #LAYER 1: 122880
 #LAYER 2: 614400
 #Layer 3: 368640
@@ -33,7 +33,10 @@ fr = 0
 
 for n in range(num_train):
     part = hkl.load("../vim2/results/layer"+str(layer)+"/trainerr" + str(n) + ".hkl")
-    print part.shape
+    print "shape" +str(part.shape)
+    if part.shape[1]*part.shape[2]*part.shape[3] != layer_size:
+        print "incompatible: expected shape: ", layer_size , " actual shape: ", part.shape[1]*part.shape[2]*part.shape[3]
+        break
     for i in range(part.shape[0]):
         for j in range(part.shape[1]):
             for k in range(part.shape[2]):

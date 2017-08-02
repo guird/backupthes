@@ -171,7 +171,7 @@ plt.hist(corr[maxalph], bins=(300))
 plt.title("Correlation Histogram for Pixels with area:" + ROI + "  Subject " +str(Subject))
 plt.xlabel('Correlation')
 plt.ylabel('Frequency (voxels)')
-np.save("pixelscorr" + ROI+str(Subject)+".np", corr)
+np.save("pixelscorr" + ROI+str(Subject)+".np", corr[maxalph])
 plt.savefig("pixelscorr"+ROI+str(Subject)+".png")
 with open("pixelscorr"+ROI+str(Subject)+".txt", 'w') as t:
     t.write("mean: "+str(np.mean(corr[maxalph])) +", \n max: " 

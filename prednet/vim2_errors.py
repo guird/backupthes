@@ -25,7 +25,7 @@ from prednet import PredNet
 starttime = time.time() 
 layer = sys.argv[1]
 print "layer " + str(layer)
-WEIGHTS_DIR = "model_data"
+WEIGHTS_DIR = "vim2_weights"
 DATA_DIR = "../vim2/preprocessed"
 RESULTS_SAVE_DIR = "../vim2/results/layer" + str(layer)
 
@@ -43,9 +43,11 @@ fperbat = 540
 nbatches = nframes/fperbat
 file_overlap = 10
 
-weights_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_weights.hdf5')
-json_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_model.json')
+#weights_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_weights.hdf5')
+#json_file = os.path.join(WEIGHTS_DIR, 'prednet_kitti_model.json')
 test_file = DATA_DIR+ '/vim2_test'
+weights_file = os.path.join(WEIGHTS_DIR, 'vim2_weights')
+json_file = os.path.join(WEIGHTS_DIR, 'vim2_weights.json')
 #test_sources = os.path.join(DATA_DIR, 'sources_test.hkl')
 
 # Load trained model

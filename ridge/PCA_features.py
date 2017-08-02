@@ -1,8 +1,9 @@
 import numpy as np
+import sys
 from scipy.io import loadmat,savemat
 from sklearn.decomposition import PCA, IncrementalPCA, KernelPCA
 import tables
-layer = 0
+layer = sys.argv[1]
 
 data = loadmat("../vim2/results/errl"+str(layer)+".mat")["train"]
 """
@@ -26,9 +27,11 @@ for i in range(data.shape[0]):
             data[i,j] = 0 
 
 print data.shape
-ipca = IncrementalPCA(n_components=100)
+comps = 10000
+ipca = IncrementalPCA(n_components=10000)
 trans = ipca.fit_transform(data)
 print ipca.explained_variance_ratio_
+print np.sum(ipca.explained_variance_ratio_)
 #print np.sum(np.var(data))) / np.var(ipca, axis=0) 
-print trans
+print trans.shape
 savemat("PCAl"+str(layer)+".mat", {"pca":trans})
