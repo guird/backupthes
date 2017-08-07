@@ -1,13 +1,14 @@
 import numpy as np
 from ridge import ridge, ridge_corr, bootstrap_ridge
 import matplotlib
-import sys
+import sys, gc
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
 import tables
 from scipy.misc import imresize
 from scipy.stats.mstats import zscore
 from skimage.color import rgb2gray as rg
+from sklearn.decomposition import PCA
 
 TR = 1.0  # seconds
 fps = 15
@@ -76,6 +77,16 @@ features_test = 0
 
 print featuretrain.shape
 print featuretest.shape
+
+pca = PCA(n_components=10000)
+pcad = pca.fit_transform(np.concatenate((featuretrain,featuretest),axis=0))
+featuretrain=pcad[:7200]
+featuretest=pcad[7200:]
+print np.sum(pca.explained_variance_ratio_)
+pcad = 0
+pca=0
+gc.collect()
+
 
 # choose ROI
 
@@ -151,7 +162,7 @@ for i in range(Rresptdev.shape[0]):
 Rresp = ((Rresp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
 # Presp = zscore(zscore(Presp, axis=1), axis=0)[5:-5]
 Presp =((Presp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
-alphas = np.logspace(0,3,190)
+alphas = np.logspace(0,3,200)
 
 print Rresptdev
 print Rstimstdev

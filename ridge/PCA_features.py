@@ -1,11 +1,12 @@
 import numpy as np
-import sys
+import sys, gc
 from scipy.io import loadmat,savemat
 from sklearn.decomposition import PCA, IncrementalPCA, KernelPCA
 import tables
+import hickle as hkl
 layer = sys.argv[1]
 
-data = loadmat("../vim2/results/errl"+str(layer)+".mat")["train"]
+data = hkl.load("../vim2/results/errtrainl"+str(layer)+".hkl")#["train"]
 """
 Fi = tables.open_file("/vol/ccnlab-scratch1/hugo/vim2/Stimuli.mat")
 
@@ -16,7 +17,7 @@ for i in range(data.shape[0]):
 Fi.close()
 print data.shape
 """
-#data= np.concatenate((data,loadmat("../vim2/results/errl"+str(layer)+".mat")["test"]), axis=0)
+data= np.concatenate((data,hkl.load("../vim2/results/errtestl"+str(layer)+".mat")),axis=0)#["test"]), axis=0)
 print data.shape
 print np.amax(data)
 print np.amin(data)
@@ -27,11 +28,23 @@ for i in range(data.shape[0]):
             data[i,j] = 0 
 
 print data.shape
+desired_evr = 99.9
 comps = 10000
-ipca = IncrementalPCA(n_components=10000)
+ipca = IncrementalPCA(n_components=comps)
 trans = ipca.fit_transform(data)
-print ipca.explained_variance_ratio_
+
 print np.sum(ipca.explained_variance_ratio_)
+"""
+while np.sum(ipca.explained_variance_ratio_)<desired_evr:
+    comps += 1000
+    ipca=0
+    trans=0
+    gc.collect()
+    ipca = IncrementalPCA(n_components=comps)
+    trans = ipca.fit_transform(data)
+   """ 
+    
+
 #print np.sum(np.var(data))) / np.var(ipca, axis=0) 
 print trans.shape
 savemat("PCAl"+str(layer)+".mat", {"pca":trans})

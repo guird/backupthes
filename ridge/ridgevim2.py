@@ -91,9 +91,9 @@ test_frames = featuretest.shape[0]
 print featuretrain.shape
 print featuretest.shape
 """
-featuretrain= loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['train']
+featuretrain= loadmat("/vol/ccnlab-scratch1/hugo/ridge/PCAl"+str(layer)+".mat")['pca'][:7200]
 
-featuretest= loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['test']
+featuretest= loadmat("/vol/ccnlab-scratch1/hugo/ridge/PCAl"+str(layer)+".mat")['pca'][7200:]
 
 #print loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['train'].shape
 #print loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['test'].shape
