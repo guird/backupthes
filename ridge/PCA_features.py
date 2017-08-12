@@ -6,7 +6,9 @@ import tables
 import hickle as hkl
 layer = sys.argv[1]
 
-data = hkl.load("../vim2/results/errtrainl"+str(layer)+".hkl")#["train"]
+#data = hkl.load("../vim2/results/errtrainl"+str(layer)+".hkl")#["train"]
+data = loadmat("../vim2/results/errl"+str(layer)+".mat")["train"]
+
 """
 Fi = tables.open_file("/vol/ccnlab-scratch1/hugo/vim2/Stimuli.mat")
 
@@ -17,7 +19,9 @@ for i in range(data.shape[0]):
 Fi.close()
 print data.shape
 """
-data= np.concatenate((data,hkl.load("../vim2/results/errtestl"+str(layer)+".mat")),axis=0)#["test"]), axis=0)
+#data= np.concatenate((data,hkl.load("../vim2/results/errtestl"+str(layer)+".hkl")),axis=0)#["test"]), axis=0)
+
+data= np.concatenate((data,loadmat("../vim2/results/errl"+str(layer)+".mat")["test"]), axis=0)
 print data.shape
 print np.amax(data)
 print np.amin(data)
@@ -28,9 +32,9 @@ for i in range(data.shape[0]):
             data[i,j] = 0 
 
 print data.shape
-desired_evr = 99.9
-comps = 10000
-ipca = IncrementalPCA(n_components=comps)
+desired_evr = 0.999
+comps = None
+ipca = IncrementalPCA(n_components=desired_evr)
 trans = ipca.fit_transform(data)
 
 print np.sum(ipca.explained_variance_ratio_)

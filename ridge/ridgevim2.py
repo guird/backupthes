@@ -91,9 +91,9 @@ test_frames = featuretest.shape[0]
 print featuretrain.shape
 print featuretest.shape
 """
-featuretrain= loadmat("/vol/ccnlab-scratch1/hugo/ridge/PCAl"+str(layer)+".mat")['pca'][:7200]
+featuretrain= np.float32(loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['train'])
 
-featuretest= loadmat("/vol/ccnlab-scratch1/hugo/ridge/PCAl"+str(layer)+".mat")['pca'][7200:]
+featuretest= np.float32(loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['test'])
 
 #print loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['train'].shape
 #print loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['test'].shape
@@ -227,7 +227,7 @@ for i in range(Rresptdev.shape[0]):
 Rresp = ((Rresp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
 # Presp = zscore(zscore(Presp, axis=1), axis=0)[5:-5]
 Presp =((Presp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
-alphas = np.logspace(100,3,190)
+alphas = 10000*2**np.arange(10)#np.logspace(100,3,190)
 
 
 
@@ -303,6 +303,6 @@ Remember to plot residuals
 #plt.savefig("residualsvim.png")
 #plt.clf()
 
-plt.hist(corr[maxalph], bins=(200))
+plt.hist(corr[maxalph], bins=len(corr[maxalph]))
 print "ridge complete"
 plt.savefig("err" + str(layer) + "corr"+ROI+str(Subject)+".png")

@@ -75,7 +75,7 @@ for n in range(num_test):
 
     while pp+15 < part.shape[0]:
         
-        mini = part[pp:pp + 15]
+        mini = np.float32(part[pp:pp + 15])
         #mini = mini[:, :3, :, :] + mini[:, 3:, :, :]
         outtest[fr] = np.mean(mini.reshape((15, layer_size)), axis=0)
 
@@ -85,6 +85,6 @@ for n in range(num_test):
         fr += 1
         pp += 15
 
-hkl.dump(outtrain,"../vim2/results/errtrainl"+str(layer)+".hkl")
-hkl.dump(outtest, "../vim2/results/errtestl1"+str(layer)+".hkl")
-#savemat("../vim2/results/errl"+ str(layer)+ ".mat", {"train":outtrain, "test":outtest})
+#hkl.dump(outtrain,"../vim2/results/errtrainl"+str(layer)+".hkl")
+#hkl.dump(outtest, "../vim2/results/errtestl1"+str(layer)+".hkl")
+savemat("../vim2/results/errl"+ str(layer)+ ".mat", {"train":outtrain, "test":outtest})

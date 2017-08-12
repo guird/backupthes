@@ -13,7 +13,7 @@ from sklearn.decomposition import PCA
 TR = 1.0  # seconds
 fps = 15
 
-numfeats = 128*128*3
+numfeats =96*96 #128*128*3
 min_delay = 3  # times TR
 
 #############SELECT SUBJECT, area####################
@@ -24,6 +24,7 @@ ROI = sys.argv[2]#"v1"
 ###############################################
 
 
+print "ROI: " + ROI
 
 roilist = [ ROI+'lh', ROI+'rh']#, 'v2lh', 'v2rh']
 
@@ -40,6 +41,7 @@ test_frames = features_test.shape[0]
 
 print "Storing pixel values in feature vector"
 
+
 frame = 0
 el = 0
 featuretrain = np.zeros((train_frames / 15, numfeats))
@@ -47,10 +49,13 @@ while frame < train_frames:
 
     chunk = features_train[frame:frame + 15]  # first resize the image
     chunk.transpose((0, 2, 3, 1))
-    resizedchunk = np.zeros((15, 3,128, 128))
 
+    #resizedchunk = np.zeros((15, 3,128, 128))
+    resizedchunk = np.zeros((15, 96,96))
+   
     for i in range(15):
-        resizedchunk[i] = chunk[i]
+        resizedchunk[i] =  rg(imresize(chunk[i], (96,96)))
+   
 
     featuretrain[el] = np.mean(resizedchunk, axis=0).flatten()
 
@@ -66,11 +71,13 @@ featuretest = np.zeros((test_frames / 15, numfeats))
 while frame < test_frames:
     chunk = features_test[frame:frame + 15]  # first resize the image
     chunk.transpose((0, 2, 3, 1))
-    resizedchunk = np.zeros((15, 3, 128, 128))
+    #resizedchunk = np.zeros((15, 3, 128, 128))
+    resizedchunk = np.zeros((15, 96, 96))
+   
     for i in range(15):
-        resizedchunk[i] = chunk[i]
+        resizedchunk[i] = rg(imresize(chunk[i], (96,96)))
     featuretest[el] = np.mean(resizedchunk, axis=0).flatten()
-
+    
     frame += 15
     el += 1
 features_test = 0
@@ -78,7 +85,8 @@ features_test = 0
 print featuretrain.shape
 print featuretest.shape
 
-pca = PCA(n_components=10000)
+"""
+pca = PCA(n_components=0.999)
 pcad = pca.fit_transform(np.concatenate((featuretrain,featuretest),axis=0))
 featuretrain=pcad[:7200]
 featuretest=pcad[7200:]
@@ -86,7 +94,7 @@ print np.sum(pca.explained_variance_ratio_)
 pcad = 0
 pca=0
 gc.collect()
-
+"""
 
 # choose ROI
 
@@ -162,10 +170,7 @@ for i in range(Rresptdev.shape[0]):
 Rresp = ((Rresp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
 # Presp = zscore(zscore(Presp, axis=1), axis=0)[5:-5]
 Presp =((Presp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
-alphas = np.logspace(0,3,200)
-
-print Rresptdev
-print Rstimstdev
+alphas = 10000 *2**np.arange(10)
 
 
 
@@ -174,11 +179,13 @@ corr = ridge_corr(RStim, PStim, Rresp, Presp, alphas)
 
 # hkl.dump(corr, "corr"+".hkl")
 #savemat('corrs_pix.mat', {'corr': corr})
-#plt.plot(np.mean(corr,axis=1))
+plt.plot(np.mean(corr,axis=1))
+plt.savefig('corss.png')
+plt.clf()
 maxalph = np.argmax(np.mean(corr, axis=1))
 print maxalph
 print np.mean(corr[maxalph])
-plt.hist(corr[maxalph], bins=(300))
+plt.hist(corr[maxalph], bins=len(corr[maxalph])/5)#(300))
 plt.title("Correlation Histogram for Pixels with area:" + ROI + "  Subject " +str(Subject))
 plt.xlabel('Correlation')
 plt.ylabel('Frequency (voxels)')
@@ -188,3 +195,4 @@ with open("pixelscorr"+ROI+str(Subject)+".txt", 'w') as t:
     t.write("mean: "+str(np.mean(corr[maxalph])) +", \n max: " 
             + str(corr[maxalph].max()))
     t.close()
+
