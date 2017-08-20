@@ -1,7 +1,7 @@
 import hickle as hkl
 from scipy.io import savemat, loadmat
 import numpy as np
-import sys
+import sys, gc
 import tables
 """This code takes the extracted error files and stitches them together chronologically and averages them olve 1 second"""
 #15 frames
@@ -16,9 +16,10 @@ layer = int(sys.argv[1])
 #Layer 3: 368640
 #layer 4!? 245760
 
-part = hkl.load("../vim2/results/layer"+str(layer)+"/trainerr" + str(0) + ".hkl")
+part = np.float32(hkl.load("../vim2/results/layer"+str(layer)+"/trainerr" + str(0) + ".hkl"))
 print "layer" + str(layer)
 layer_size = part.shape[1]*part.shape[2]*part.shape[3]
+layer_size = layer_size/2
 print "layer_size " + str(layer_size)
 
 
@@ -30,9 +31,6 @@ fr = 0
 for n in range(num_train):
     
     
-    if part.shape[1]*part.shape[2]*part.shape[3] != layer_size:
-        print "incompatible: expected shape: ", layer_size , " actual shape: ", part.shape[1]*part.shape[2]*part.shape[3]
-        break
     for i in range(part.shape[0]):
         for j in range(part.shape[1]):
             for k in range(part.shape[2]):
@@ -40,12 +38,15 @@ for n in range(num_train):
                     if np.isnan(part[i,j,k,l]) or np.isinf(part[i,j,k,l]):
                         part[i,j,k,l] = 0
     print "train filee no. " + str(n)
-    
+    copt = part.shape[1]/2
+    print copt
     pp =0
     while pp+15 < part.shape[0]:
+        
         mini = part[pp:pp+15]
         
-
+        mini = mini[:,:copt,:,:] - mini[:,copt:,:,:]
+        
         #miniup=mini[:,3:,:,:]#mini[:,:3,:,:]
 
         
@@ -54,7 +55,8 @@ for n in range(num_train):
         fr +=1
         pp +=15
 
-
+    mini = 0 
+    gc.collect()
 
 
 outtest = np.zeros((540, layer_size))
@@ -72,11 +74,13 @@ for n in range(num_test):
                         print "nan replaced"
     print "test file no. " + str(n)
     pp = 0
-
+    copt = part.shape[1]/2
     while pp+15 < part.shape[0]:
         
-        mini = np.float32(part[pp:pp + 15])
-        #mini = mini[:, :3, :, :] + mini[:, 3:, :, :]
+        mini = (part[pp:pp + 15])
+        mini = mini[:,:copt,:,:] - mini[:,copt:,:,:]
+
+        
         outtest[fr] = np.mean(mini.reshape((15, layer_size)), axis=0)
 
 
@@ -85,6 +89,8 @@ for n in range(num_test):
         fr += 1
         pp += 15
 
-#hkl.dump(outtrain,"../vim2/results/errtrainl"+str(layer)+".hkl")
-#hkl.dump(outtest, "../vim2/results/errtestl1"+str(layer)+".hkl")
-savemat("../vim2/results/errl"+ str(layer)+ ".mat", {"train":outtrain, "test":outtest})
+    gc.collect()
+print outtrain.nbytes      
+hkl.dump(outtrain,"../vim2/results/errtrainl"+str(layer)+".hkl")
+hkl.dump(outtest, "../vim2/results/errtestl"+str(layer)+".hkl")
+#savemat("../vim2/results/errl"+ str(layer)+ ".mat", {"train":outtrain, "test":outtest})

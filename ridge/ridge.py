@@ -124,6 +124,7 @@ def ridge_corr(Rstim, Pstim, Rresp, Presp, alphas, normalpha=False, corrmin=0.2,
         U,S,Vh = svd_dgesvd(Rstim, full_matrices=False)
 
     ## Truncate tiny singular values for speed
+    print S
     origsize = S.shape[0]
     ngoodS = np.sum(S > singcutoff)
     nbad = origsize-ngoodS

@@ -13,7 +13,7 @@ from sklearn.decomposition import PCA
 TR = 1.0  # seconds
 fps = 15
 
-numfeats =96*96 #128*128*3
+numfeats =128*128*3
 min_delay = 3  # times TR
 
 #############SELECT SUBJECT, area####################
@@ -50,11 +50,11 @@ while frame < train_frames:
     chunk = features_train[frame:frame + 15]  # first resize the image
     chunk.transpose((0, 2, 3, 1))
 
-    #resizedchunk = np.zeros((15, 3,128, 128))
-    resizedchunk = np.zeros((15, 96,96))
+    resizedchunk = np.zeros((15, 3,128, 128))
+    #resizedchunk = np.zeros((15, 96,96))
    
     for i in range(15):
-        resizedchunk[i] =  rg(imresize(chunk[i], (96,96)))
+        resizedchunk[i] =  chunk[i]#rg(imresize(chunk[i], (96,96)))
    
 
     featuretrain[el] = np.mean(resizedchunk, axis=0).flatten()
@@ -71,11 +71,11 @@ featuretest = np.zeros((test_frames / 15, numfeats))
 while frame < test_frames:
     chunk = features_test[frame:frame + 15]  # first resize the image
     chunk.transpose((0, 2, 3, 1))
-    #resizedchunk = np.zeros((15, 3, 128, 128))
-    resizedchunk = np.zeros((15, 96, 96))
+    resizedchunk = np.zeros((15, 3, 128, 128))
+    #resizedchunk = np.zeros((15, 96, 96))
    
     for i in range(15):
-        resizedchunk[i] = rg(imresize(chunk[i], (96,96)))
+        resizedchunk[i] = chunk[i]#rg(imresize(chunk[i], (96,96)))
     featuretest[el] = np.mean(resizedchunk, axis=0).flatten()
     
     frame += 15
@@ -140,14 +140,14 @@ resptrain = 0
 
 print "Concatenating..."
 
-RStim = np.concatenate((np.roll(featuretrain, -min_delay, axis=0),
-                        np.roll(featuretrain, -(min_delay + 1), axis=0),
-                        np.roll(featuretrain, -(min_delay + 2),axis=0)), axis=1)[min_delay+2:-(min_delay+2)]
+RStim = np.concatenate((np.roll(featuretrain, min_delay, axis=0),
+                        np.roll(featuretrain, (min_delay + 1), axis=0),
+                        np.roll(featuretrain, (min_delay + 2),axis=0)), axis=1)[min_delay+2:-(min_delay+2)]
 featuretrain = 0
 
-PStim = np.concatenate((np.roll(featuretest, -(min_delay), axis=0),
-                        np.roll(featuretest, -(min_delay + 1),axis=0),
-                        np.roll(featuretest, -(min_delay + 2),axis=0)), axis=1)[min_delay+2:-(min_delay+2)]
+PStim = np.concatenate((np.roll(featuretest, (min_delay), axis=0),
+                        np.roll(featuretest, (min_delay + 1),axis=0),
+                        np.roll(featuretest, (min_delay + 2),axis=0)), axis=1)[min_delay+2:-(min_delay+2)]
 featuretrain = 0
 # RStim = zscore(zscore(RStim, axis=1), axis=0)[5:-5]
 Rstimmu = np.mean(np.concatenate((RStim, PStim), axis=0), axis=0)
@@ -170,7 +170,7 @@ for i in range(Rresptdev.shape[0]):
 Rresp = ((Rresp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
 # Presp = zscore(zscore(Presp, axis=1), axis=0)[5:-5]
 Presp =((Presp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
-alphas = 10000 *2**np.arange(10)
+alphas = np.logspace(20,0,200)
 
 
 
