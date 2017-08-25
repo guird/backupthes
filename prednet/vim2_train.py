@@ -25,9 +25,7 @@ from video_tools import ani_frame
 starttime = time()
 
 
-#with K.tf.device('/gpu:1'):
 for g in (0,):
-    #from data_utils import SequenceGenerator 
     
     WEIGHTS_DIR = "model_data"
     DATA_DIR = "../vim2/preprocessed/"
@@ -157,6 +155,7 @@ for g in (0,):
                         totnans +=  np.sum(np.isnan(np.array(arr)))
                         totinfs +=  np.sum(np.isinf(np.array(arr)))
                     if totnans > 0:
+                        sys.stderr.write("Training data contains  NAN, aborting")
                         print totnans
                         print  "batch"+ str(batch_num) +"minibatch" + str(j)
                         ani_frame (bat[j*minibatch_size:(j+1)*minibatch_size],
@@ -166,7 +165,7 @@ for g in (0,):
                                "minibatch"
                                + str(j),
                                30)
-                    sys.exit()
+                        sys.exit()
 
                 
                     print "nans and infs"

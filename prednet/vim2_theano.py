@@ -25,9 +25,7 @@ from video_tools import ani_frame
 starttime = time()
 
 
-#with K.tf.device('/gpu:1'):
 for g in (0,):
-    #from data_utils import SequenceGenerator 
     
     WEIGHTS_DIR = "model_data"
     DATA_DIR = "../vim2/preprocessed/"
@@ -45,7 +43,6 @@ for g in (0,):
     out_file = os.path.join(WEIGHTS_OUT_DIR, "vim2_weights")
     weights_file = out_file
     json_file = out_file + ".json"
-    #test_sources = os.path.join(DATA_DIR, 'sources_test.hkl')
     
     num_epochs = 10
     num_samples = 108000
@@ -86,9 +83,6 @@ for g in (0,):
     model.compile(loss='mean_absolute_error', optimizer='adam')
     train_model = 0
     gc.collect()
-    #test_generator = SequenceGenerator(test_file, test_sources, nt, sequence_start_mode='unique', dim_ordering=dim_ordering)
-    #X_test = test_generator.create_all()
-    #[int(vim2_stim2.shape[0] / batch_size# )
 
 
 

@@ -91,20 +91,11 @@ test_frames = featuretest.shape[0]
 print featuretrain.shape
 print featuretest.shape
 """
-# featuretrain= np.float32(loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['train'])
-
-# print featuretrain.shape
-
-# featuretest= np.float32(loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['test'])
-
-#print featuretest.shape
 
 featuretrain = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/vim2/results/errtrainl"+str(layer)+".hkl"))
 featuretest = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/vim2/results/errtestl"+str(layer)+".hkl"))
 
 
-#print loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['train'].shape
-#print loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['test'].shape
 
 """
 featuretrain = np.concatenate((featuretrain,loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['train']), axis=1)#Fi.get_node('/train'))
@@ -240,75 +231,75 @@ alphas = np.logspace(20,0,200)
 gc.collect()
 
 
-# print "Shapes:"
+print "Shapes:"
 
-# print RStim.shape
-# print PStim.shape
-# print Rresp.shape
-# print Presp.shape
+print RStim.shape
+print PStim.shape
+print Rresp.shape
+print Presp.shape
 
-# print "Starting ridge regression.."
+print "Starting ridge regression.."
 
-# #RStim = 0
-# #Rresp = 0
-# """
-# top = -10000
-# corrs =[]
-# for alph in alphas:
-#     r = sklridge(alpha =alph, solver='sag')
+#RStim = 0
+#Rresp = 0
+"""
+top = -10000
+corrs =[]
+for alph in alphas:
+    r = sklridge(alpha =alph, solver='sag')
     
-#     r.fit(RStim, Rresp)
-#     print "fitted " + str(alph)
-#     pred = r.predict(PStim)
-#     res = pred - Presp
-#     pred = (1- (np.sum((res)**2, axis=0))/(np.sum(((Presp - Presp.mean(axis=0))**2), axis=0)))
+    r.fit(RStim, Rresp)
+    print "fitted " + str(alph)
+    pred = r.predict(PStim)
+    res = pred - Presp
+    pred = (1- (np.sum((res)**2, axis=0))/(np.sum(((Presp - Presp.mean(axis=0))**2), axis=0)))
     
     
-#     numnan = 0
-#     for c in range(pred.shape[0]):
-#         if np.isnan(pred[c]) or np.isinf(pred[c]):
-#             pred[c] = 0
-#             numnan +=1
-#     print "nans: " + str(numnan)
+    numnan = 0
+    for c in range(pred.shape[0]):
+        if np.isnan(pred[c]) or np.isinf(pred[c]):
+            pred[c] = 0
+            numnan +=1
+    print "nans: " + str(numnan)
 
             
-#     print pred.shape
-#     print np.mean(pred)
-#     corrs.append(np.mean(pred))
-#     if np.mean(pred) > top:
-#         corr = pred
-#         residuals = res
-#         top = np.mean(pred)
-#         print "new best alpha: " + str(alph)
-#     if time()> starttime + 72000:
-#         print "Cease now"
-#         break
-# if top == -10000:
-#     corr = pred
-# """
-# corr = ridge_corr(RStim, PStim, Rresp, Presp, alphas)
-# PStim=0
-# Presp=0
-# Rresp =0
-# RStim=0
-# gc.collect()
-# maxalph = np.argmax(np.mean(corr,axis=1))
-# np.save( "err" + str(layer) + "corr"+ROI+str(Subject)+".npy", corr[maxalph])
-# print "regdone"
-# # hkl.dump(corr, "corr"+".hkl")
-# #savemat('corrs_pix.mat', {'corr': corr})
-# plt.plot(np.mean(corr, axis=1))
-# plt.savefig("corrs_alphas.png")
-# plt.clf()
-# """
-# Remember to plot residuals
-# """
-# #maxalph = np.argmax(np.mean(corr, axis=1))
-# #print maxalph
-# #plt.scatter(residuals.flatten(), range(residuals.size))
-# #plt.savefig("residualsvim.png")
-# #plt.clf()
+    print pred.shape
+    print np.mean(pred)
+    corrs.append(np.mean(pred))
+    if np.mean(pred) > top:
+        corr = pred
+        residuals = res
+        top = np.mean(pred)
+        print "new best alpha: " + str(alph)
+    if time()> starttime + 72000:
+        print "Cease now"
+        break
+if top == -10000:
+    corr = pred
+"""
+corr = ridge_corr(RStim, PStim, Rresp, Presp, alphas)
+PStim=0
+Presp=0
+Rresp =0
+RStim=0
+gc.collect()
+maxalph = np.argmax(np.mean(corr,axis=1))
+np.save( "err" + str(layer) + "corr"+ROI+str(Subject)+".npy", corr[maxalph])
+print "regdone"
+# hkl.dump(corr, "corr"+".hkl")
+#savemat('corrs_pix.mat', {'corr': corr})
+plt.plot(np.mean(corr, axis=1))
+plt.savefig("corrs_alphas.png")
+plt.clf()
+"""
+Remember to plot residuals
+"""
+#maxalph = np.argmax(np.mean(corr, axis=1))
+#print maxalph
+#plt.scatter(residuals.flatten(), range(residuals.size))
+#plt.savefig("residualsvim.png")
+#plt.clf()
 
-# plt.hist(corr[maxalph], bins=len(corr[maxalph])/5)
-# print "ridge complete"
-# plt.savefig("err" + str(layer) + "corr"+ROI+str(Subject)+".png")
+plt.hist(corr[maxalph], bins=len(corr[maxalph])/5)
+print "ridge complete"
+plt.savefig("err" + str(layer) + "corr"+ROI+str(Subject)+".png")

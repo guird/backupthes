@@ -19,7 +19,7 @@ layer = int(sys.argv[1])
 part = np.float32(hkl.load("../vim2/results/layer"+str(layer)+"/trainerr" + str(0) + ".hkl"))
 print "layer" + str(layer)
 layer_size = part.shape[1]*part.shape[2]*part.shape[3]
-layer_size = layer_size/2
+#layer_size = layer_size/2
 print "layer_size " + str(layer_size)
 
 
@@ -45,7 +45,7 @@ for n in range(num_train):
         
         mini = part[pp:pp+15]
         
-        mini = mini[:,:copt,:,:] - mini[:,copt:,:,:]
+        #mini = mini[:,:copt,:,:] - mini[:,copt:,:,:]
         
         #miniup=mini[:,3:,:,:]#mini[:,:3,:,:]
 
@@ -78,7 +78,7 @@ for n in range(num_test):
     while pp+15 < part.shape[0]:
         
         mini = (part[pp:pp + 15])
-        mini = mini[:,:copt,:,:] - mini[:,copt:,:,:]
+        #mini = mini[:,:copt,:,:] - mini[:,copt:,:,:]
 
         
         outtest[fr] = np.mean(mini.reshape((15, layer_size)), axis=0)

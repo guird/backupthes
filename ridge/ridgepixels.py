@@ -7,13 +7,16 @@ from matplotlib import pyplot as plt
 import tables
 from scipy.misc import imresize
 from scipy.stats.mstats import zscore
-from skimage.color import rgb2gray as rg
+from skimage.transform import pyramid_reduce
+#from skimage.color import rgb2gray as rg
 from sklearn.decomposition import PCA
+from smooth_and_downsample import smooth_and_downsample
 
 TR = 1.0  # seconds
 fps = 15
 
 numfeats =128*128*3
+numfeats = 64*64*3
 min_delay = 3  # times TR
 
 #############SELECT SUBJECT, area####################
@@ -39,54 +42,60 @@ features_test = (Fi.get_node('/sv'))
 
 test_frames = features_test.shape[0]
 
+n_channels = 3
+
 print "Storing pixel values in feature vector"
 
+###Improving on abstraction
+def TR_mean_and_resize(f):
+    #ndarray(seconds,3*len/2*width/2) TR_mean_and_resize(ndarray(frames,3,len,width))
+    """
+    accepts a video, smooths and downsamples it to halve length and width 
+    """
+    frame = 0
+    el = 0
+    frames = f.shape[0]
+    numfeats = f.shape[1] * f.shape[2]/2 * f.shape[3]/2
+    fout = np.zeros((seconds, numfeats))
+    while frame <frames:
 
-frame = 0
-el = 0
-featuretrain = np.zeros((train_frames / 15, numfeats))
-while frame < train_frames:
+        chunk = f[frame:frame + 15]  # first resize the image
+        chunk.transpose((0, 2, 3, 1))
 
-    chunk = features_train[frame:frame + 15]  # first resize the image
-    chunk.transpose((0, 2, 3, 1))
-
-    resizedchunk = np.zeros((15, 3,128, 128))
-    #resizedchunk = np.zeros((15, 96,96))
+        resizedchunk = np.zeros((15, 3, f.shape[2]/2, f.shape[3]/2))
+        #resizedchunk = np.zeros((15, 96,96))
    
-    for i in range(15):
-        resizedchunk[i] =  chunk[i]#rg(imresize(chunk[i], (96,96)))
+        for i in range(15):
+            resizedchunk[i] =  pyramid_reduce(
+                pyramid_reduce(
+                    chunk[i].transpose(0,2,1)).transpose((0,2,1))
+            )
    
 
-    featuretrain[el] = np.mean(resizedchunk, axis=0).flatten()
+        fout[el] = np.mean(resizedchunk, axis=0).flatten()
 
-    frame += 15
-    el += 1
+        frame += 15
+        el += 1
+    return fout  
+###end_func
+
+featuretrain = TR_mean_and_resize(features_train)
+
 features_train = 0
 
-print "Resizing all images"
+featuretest = TR_mean_and_resize(features_test)
 
-frame = 0
-el = 0
-featuretest = np.zeros((test_frames / 15, numfeats))
-while frame < test_frames:
-    chunk = features_test[frame:frame + 15]  # first resize the image
-    chunk.transpose((0, 2, 3, 1))
-    resizedchunk = np.zeros((15, 3, 128, 128))
-    #resizedchunk = np.zeros((15, 96, 96))
-   
-    for i in range(15):
-        resizedchunk[i] = chunk[i]#rg(imresize(chunk[i], (96,96)))
-    featuretest[el] = np.mean(resizedchunk, axis=0).flatten()
-    
-    frame += 15
-    el += 1
 features_test = 0
+
+print "Resizing all images"
 
 print featuretrain.shape
 print featuretest.shape
 
+
+
 """
-pca = PCA(n_components=0.999)
+pca = PCA(n_components=10000)
 pcad = pca.fit_transform(np.concatenate((featuretrain,featuretest),axis=0))
 featuretrain=pcad[:7200]
 featuretest=pcad[7200:]
@@ -95,7 +104,6 @@ pcad = 0
 pca=0
 gc.collect()
 """
-
 # choose ROI
 
 
@@ -139,6 +147,16 @@ resptest = 0
 resptrain = 0
 
 print "Concatenating..."
+
+def rollcat(fts, min_delay):
+    #ndarray(frames, 3*nfeats) rollcat(ndarray(frames,nfeats)
+    """
+    copies fts 3 times, rolls them by min_delay, min_delay+1, min_delay+2 respectively, concatenate them
+    """
+    
+    return np.concatenate((np.roll(featuretrain, min_delay, axis=0),
+                        np.roll(featuretrain, (min_delay + 1), axis=0),
+                        np.roll(featuretrain, (min_delay + 2),axis=0)), axis=1)[min_delay+2:-(min_delay+2)]
 
 RStim = np.concatenate((np.roll(featuretrain, min_delay, axis=0),
                         np.roll(featuretrain, (min_delay + 1), axis=0),
