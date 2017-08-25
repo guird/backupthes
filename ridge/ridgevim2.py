@@ -92,8 +92,13 @@ print featuretrain.shape
 print featuretest.shape
 """
 
-featuretrain = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/vim2/results/errtrainl"+str(layer)+".hkl"))
-featuretest = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/vim2/results/errtestl"+str(layer)+".hkl"))
+# featuretrain = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/vim2/results/errtrainl"+str(layer)+".hkl"))
+# featuretest = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/vim2/results/errtestl"+str(layer)+".hkl"))
+
+featuretrain = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/ridge/PCAtrainl"+
+                                   str(layer) + ",hkl" ))
+featuretest = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/ridge/PCAtestl"+ 
+                                  str(layer)+ "hkl"))
 
 
 
@@ -240,43 +245,6 @@ print Presp.shape
 
 print "Starting ridge regression.."
 
-#RStim = 0
-#Rresp = 0
-"""
-top = -10000
-corrs =[]
-for alph in alphas:
-    r = sklridge(alpha =alph, solver='sag')
-    
-    r.fit(RStim, Rresp)
-    print "fitted " + str(alph)
-    pred = r.predict(PStim)
-    res = pred - Presp
-    pred = (1- (np.sum((res)**2, axis=0))/(np.sum(((Presp - Presp.mean(axis=0))**2), axis=0)))
-    
-    
-    numnan = 0
-    for c in range(pred.shape[0]):
-        if np.isnan(pred[c]) or np.isinf(pred[c]):
-            pred[c] = 0
-            numnan +=1
-    print "nans: " + str(numnan)
-
-            
-    print pred.shape
-    print np.mean(pred)
-    corrs.append(np.mean(pred))
-    if np.mean(pred) > top:
-        corr = pred
-        residuals = res
-        top = np.mean(pred)
-        print "new best alpha: " + str(alph)
-    if time()> starttime + 72000:
-        print "Cease now"
-        break
-if top == -10000:
-    corr = pred
-"""
 corr = ridge_corr(RStim, PStim, Rresp, Presp, alphas)
 PStim=0
 Presp=0

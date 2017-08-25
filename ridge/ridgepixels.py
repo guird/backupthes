@@ -56,6 +56,7 @@ def TR_mean_and_resize(f):
     el = 0
     frames = f.shape[0]
     numfeats = f.shape[1] * f.shape[2]/2 * f.shape[3]/2
+    seconds = frames/15
     fout = np.zeros((seconds, numfeats))
     while frame <frames:
 
@@ -94,7 +95,7 @@ print featuretest.shape
 
 
 
-"""
+
 pca = PCA(n_components=10000)
 pcad = pca.fit_transform(np.concatenate((featuretrain,featuretest),axis=0))
 featuretrain=pcad[:7200]
@@ -103,7 +104,7 @@ print np.sum(pca.explained_variance_ratio_)
 pcad = 0
 pca=0
 gc.collect()
-"""
+
 # choose ROI
 
 
@@ -154,19 +155,16 @@ def rollcat(fts, min_delay):
     copies fts 3 times, rolls them by min_delay, min_delay+1, min_delay+2 respectively, concatenate them
     """
     
-    return np.concatenate((np.roll(featuretrain, min_delay, axis=0),
-                        np.roll(featuretrain, (min_delay + 1), axis=0),
-                        np.roll(featuretrain, (min_delay + 2),axis=0)), axis=1)[min_delay+2:-(min_delay+2)]
+    return np.concatenate((np.roll(fts, min_delay, axis=0),
+                        np.roll(fts, (min_delay + 1), axis=0),
+                        np.roll(fts, (min_delay + 2),axis=0)), axis=1)[min_delay+2:-(min_delay+2)]
 
-RStim = np.concatenate((np.roll(featuretrain, min_delay, axis=0),
-                        np.roll(featuretrain, (min_delay + 1), axis=0),
-                        np.roll(featuretrain, (min_delay + 2),axis=0)), axis=1)[min_delay+2:-(min_delay+2)]
+RStim = rollcat(featuretrain,min_delay)
 featuretrain = 0
 
-PStim = np.concatenate((np.roll(featuretest, (min_delay), axis=0),
-                        np.roll(featuretest, (min_delay + 1),axis=0),
-                        np.roll(featuretest, (min_delay + 2),axis=0)), axis=1)[min_delay+2:-(min_delay+2)]
-featuretrain = 0
+PStim = rollcat(featuretest, min_delay)
+
+featuretest = 0
 # RStim = zscore(zscore(RStim, axis=1), axis=0)[5:-5]
 Rstimmu = np.mean(np.concatenate((RStim, PStim), axis=0), axis=0)
 Rstimstdev = np.std(np.concatenate((RStim, PStim), axis=0), axis=0)
