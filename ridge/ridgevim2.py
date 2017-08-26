@@ -96,9 +96,9 @@ print featuretest.shape
 # featuretest = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/vim2/results/errtestl"+str(layer)+".hkl"))
 
 featuretrain = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/ridge/PCAtrainl"+
-                                   str(layer) + ",hkl" ))
+                                   str(layer) + ".hkl" ))
 featuretest = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/ridge/PCAtestl"+ 
-                                  str(layer)+ "hkl"))
+                                  str(layer)+ ".hkl"))
 
 
 

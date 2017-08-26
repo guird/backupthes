@@ -2,6 +2,7 @@ import numpy as np
 import sys, gc
 #from scipy.io import loadmat,savemat
 from sklearn.decomposition import IncrementalPCA 
+from scipy.stats import zscore
 #import PCA, IncrementalPCA, KernelPCA
 #import tables
 import hickle as hkl
@@ -36,6 +37,7 @@ for i in range(data.shape[0]):
 print data.shape
 
 ipca = IncrementalPCA(n_components=None)
+data = zscore(data)
 trans = ipca.fit_transform(data)
 
 print np.sum(ipca.explained_variance_ratio_)

@@ -47,7 +47,7 @@ n_channels = 3
 print "Storing pixel values in feature vector"
 
 ###Improving on abstraction
-def TR_mean_and_resize(f):
+def TR_mean(f):
     #ndarray(seconds,3*len/2*width/2) TR_mean_and_resize(ndarray(frames,3,len,width))
     """
     accepts a video, smooths and downsamples it to halve length and width 
@@ -55,7 +55,7 @@ def TR_mean_and_resize(f):
     frame = 0
     el = 0
     frames = f.shape[0]
-    numfeats = f.shape[1] * f.shape[2]/2 * f.shape[3]/2
+    numfeats = f.shape[1] * f.shape[2] * f.shape[3]
     seconds = frames/15
     fout = np.zeros((seconds, numfeats))
     while frame <frames:
@@ -63,14 +63,15 @@ def TR_mean_and_resize(f):
         chunk = f[frame:frame + 15]  # first resize the image
         chunk.transpose((0, 2, 3, 1))
 
-        resizedchunk = np.zeros((15, 3, f.shape[2]/2, f.shape[3]/2))
+        resizedchunk = np.zeros((15, 3, f.shape[2], f.shape[3]))
         #resizedchunk = np.zeros((15, 96,96))
    
         for i in range(15):
-            resizedchunk[i] =  pyramid_reduce(
-                pyramid_reduce(
-                    chunk[i].transpose(0,2,1)).transpose((0,2,1))
-            )
+            resizedchunk[i] = chunk[i]
+            # resizedchunk[i] =  pyramid_reduce(
+            #     pyramid_reduce(
+            #         chunk[i].transpose(0,2,1)).transpose((0,2,1))
+            # )
    
 
         fout[el] = np.mean(resizedchunk, axis=0).flatten()
@@ -80,11 +81,11 @@ def TR_mean_and_resize(f):
     return fout  
 ###end_func
 
-featuretrain = TR_mean_and_resize(features_train)
+featuretrain = TR_mean(features_train)
 
 features_train = 0
 
-featuretest = TR_mean_and_resize(features_test)
+featuretest = TR_mean(features_test)
 
 features_test = 0
 
@@ -97,12 +98,14 @@ print featuretest.shape
 
 
 pca = PCA(n_components=10000)
-pcad = pca.fit_transform(np.concatenate((featuretrain,featuretest),axis=0))
+pcable = zscore(np.concatenate((featuretrain,featuretest),axis=0))
+pcad = pca.fit_transform(pcable)
 featuretrain=pcad[:7200]
 featuretest=pcad[7200:]
 print np.sum(pca.explained_variance_ratio_)
 pcad = 0
 pca=0
+pcable=0
 gc.collect()
 
 # choose ROI
@@ -152,7 +155,7 @@ print "Concatenating..."
 def rollcat(fts, min_delay):
     #ndarray(frames, 3*nfeats) rollcat(ndarray(frames,nfeats)
     """
-    copies fts 3 times, rolls them by min_delay, min_delay+1, min_delay+2 respectively, concatenate them
+    copies fts 3 times, rolls them by min_delay, min_delay+1, min_delay+2 respectively, concatenate them. also crops out the first and last 3 entries
     """
     
     return np.concatenate((np.roll(fts, min_delay, axis=0),
@@ -165,27 +168,29 @@ featuretrain = 0
 PStim = rollcat(featuretest, min_delay)
 
 featuretest = 0
-# RStim = zscore(zscore(RStim, axis=1), axis=0)[5:-5]
-Rstimmu = np.mean(np.concatenate((RStim, PStim), axis=0), axis=0)
-Rstimstdev = np.std(np.concatenate((RStim, PStim), axis=0), axis=0)
+#####################ZSCORE DATA####################
+# # RStim = zscore(zscore(RStim, axis=1), axis=0)[5:-5]
+# Rstimmu = np.mean(np.concatenate((RStim, PStim), axis=0), axis=0)
+# Rstimstdev = np.std(np.concatenate((RStim, PStim), axis=0), axis=0)
 
-for i in range(Rstimstdev.shape[0]):
-    if Rstimstdev[i] == 0 or np.isnan(Rstimstdev[i]):
-        Rstimstdev[i] = 1
+# for i in range(Rstimstdev.shape[0]):
+#     if Rstimstdev[i] == 0 or np.isnan(Rstimstdev[i]):
+#         Rstimstdev[i] = 1
 
-RStim = (RStim - Rstimmu)/Rstimstdev
-# PStim = zscore(zscore(PStim, axis =1), axis=0)[5:-5]
-PStim = (PStim - Rstimmu)/Rstimstdev
-# Rresp = zscore(zscore(Rresp, axis=1), axis=0)[5:-5]
-Rrespmu = np.mean(np.concatenate((Rresp, Presp), axis=0), axis=0)
-Rresptdev = np.std(np.concatenate((Rresp, Presp), axis=0), axis=0)
-for i in range(Rresptdev.shape[0]):
-    if Rresptdev[i] == 0 or np.isnan(Rresptdev[i]):
-        print i
-        Rresptdev[i] = 1
-Rresp = ((Rresp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
-# Presp = zscore(zscore(Presp, axis=1), axis=0)[5:-5]
-Presp =((Presp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
+# RStim = (RStim - Rstimmu)/Rstimstdev
+# # PStim = zscore(zscore(PStim, axis =1), axis=0)[5:-5]
+# PStim = (PStim - Rstimmu)/Rstimstdev
+# # Rresp = zscore(zscore(Rresp, axis=1), axis=0)[5:-5]
+# Rrespmu = np.mean(np.concatenate((Rresp, Presp), axis=0), axis=0)
+# Rresptdev = np.std(np.concatenate((Rresp, Presp), axis=0), axis=0)
+# for i in range(Rresptdev.shape[0]):
+#     if Rresptdev[i] == 0 or np.isnan(Rresptdev[i]):
+#         print i
+#         Rresptdev[i] = 1
+# Rresp = ((Rresp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
+# # Presp = zscore(zscore(Presp, axis=1), axis=0)[5:-5]
+# Presp =((Presp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
+
 alphas = np.logspace(20,0,200)
 
 
