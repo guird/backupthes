@@ -1,8 +1,10 @@
 import hickle as hkl
 from scipy.io import savemat, loadmat
+from scipy.stats.mstats import zscore
 import numpy as np
 import sys, gc
 import tables
+from skimage import transform
 """This code takes the extracted error files and stitches them together chronologically and averages them olve 1 second"""
 #15 frames
 file_overlap = 10
@@ -25,11 +27,41 @@ print "layer_size " + str(layer_size)
 
 outtrain= np.zeros((7200, layer_size), dtype=np.float32)#loadmat("../vim2/results/errl1.mat")['train']
 
+def subsample(X):
+    # ndarray(seconds, channels, length/2, width/2) 
+    # subsample(ndarray(seconds, channels, length, width)
+    """
+    
+    """
+    
+    seconds = X.shape[0]
+    channels = X.shape[1]
+    length = X.shape[2]
+    width = X.shape[3]
+    Xout = np.zeros((seconds,channels,length/2,width/2))
+    for i in range(X.shape[0]):
+        j = 0
+        while j < X.shape[1]:
+            
+            Xout[i,j:j+3,:,:] = transform.pyramid_reduce(
+                 transform.pyramid_reduce(
+                     X[i,j:j+3,:,:].transpose(0,2,1)).transpose((0,2,1))
+             )
+
+            j+=3
+    return Xout
+
+# def test(expr, expec):
+#     if expr == expec:
+#         print "Success!"
+#     else:
+#         print expr, "is not equal to", expec
 
 fr = 0
 
 for n in range(num_train):
     
+    part = np.float32(hkl.load("../vim2/results/layer"+str(layer)+"/trainerr" + str(n) + ".hkl"))
     
     for i in range(part.shape[0]):
         for j in range(part.shape[1]):
@@ -43,7 +75,7 @@ for n in range(num_train):
     pp =0
     while pp+15 < part.shape[0]:
         
-        mini = part[pp:pp+15]
+        mini = subsample(part[pp:pp+15])
         
         #mini = mini[:,:copt,:,:] - mini[:,copt:,:,:]
         
@@ -51,7 +83,7 @@ for n in range(num_train):
 
         
 
-        outtrain[fr] = np.mean(mini.reshape((15,layer_size)), axis=0)
+        outtrain[fr] = np.mean(minimini.reshape((15,layer_size)), axis=0)
         fr +=1
         pp +=15
 
@@ -91,6 +123,9 @@ for n in range(num_test):
 
     gc.collect()
 print outtrain.nbytes      
-hkl.dump(outtrain,"../vim2/results/errtrainl"+str(layer)+".hkl")
-hkl.dump(outtest, "../vim2/results/errtestl"+str(layer)+".hkl")
+
+#outtest = zscore(outtest,axis=0)
+
+hkl.dump(outtrain,"../vim2/results/serrtrainl"+str(layer)+".hkl")
+hkl.dump(outtest, "../vim2/results/serrtestl"+str(layer)+".hkl")
 #savemat("../vim2/results/errl"+ str(layer)+ ".mat", {"train":outtrain, "test":outtest})

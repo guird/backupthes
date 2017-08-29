@@ -36,8 +36,20 @@ for i in range(data.shape[0]):
 
 print data.shape
 
+def checknans(array):
+    #int, 2darray checknans(2darray)
+    #replaces nans and infs in 2d array with 0
+    count =0
+    for i in range(array.shape[0]):
+        for j in range(array.shape[1]):
+            if np.isnan(array[i,j]) or np.isinf(array[i,j]):
+                array[i,j] = 0
+                count +=1
+    return count, array
+
+
 ipca = IncrementalPCA(n_components=None)
-data = zscore(data)
+nnans, data = checknans(zscore(data, axis=1))
 trans = ipca.fit_transform(data)
 
 print np.sum(ipca.explained_variance_ratio_)

@@ -33,64 +33,6 @@ roilist = [ ROI+'lh', ROI+'rh']#, 'v2lh', 'v2rh']
 featuresfolder = "../"
 
 print "made it this far"
-"""
-Fi = tables.open_file("/vol/ccnlab-scratch1/hugo/vim2/Stimuli.mat")
-
-features_train = Fi.get_node('/st')#Fi.get_node('/train'))
-
-features_test = Fi.get_node('/sv')
-
-
-train_frames = features_train.shape[0]
-
-
-frame=0
-el=0
-featuretrain=np.zeros((train_frames/15,numfeats))
-while frame < train_frames:
-
-    chunk = features_train[frame:frame + 15]  # first resize the image
-    chunk.transpose((0, 2, 3, 1))
-    resizedchunk = np.zeros((15, 3,128, 128))
-
-    for i in range(15):
-        resizedchunk[i] = chunk[i]
-
-    featuretrain[el] = np.mean(resizedchunk, axis=0).flatten()
-
-    frame += 15
-    el += 1
-features_train = 0
-train_frames = featuretrain.shape[0]
-
-
-
-test_frames = features_test.shape[0]
-
-
-
-print "Storing pixel values in feature vector"
-
-frame=0
-el=0
-featuretest=np.zeros((test_frames/15, numfeats))
-while frame < test_frames:
-    chunk = features_test[frame:frame + 15]  # first resize the image
-    chunk.transpose((0, 2, 3, 1))
-    resizedchunk = np.zeros((15, 3, 128, 128))
-    for i in range(15):
-        resizedchunk[i] = chunk[i]
-    featuretest[el] = np.mean(resizedchunk, axis=0).flatten()
-
-    frame += 15
-    el += 1
-features_test = 0
-
-test_frames = featuretest.shape[0]
-
-print featuretrain.shape
-print featuretest.shape
-"""
 
 # featuretrain = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/vim2/results/errtrainl"+str(layer)+".hkl"))
 # featuretest = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/vim2/results/errtestl"+str(layer)+".hkl"))
@@ -102,30 +44,16 @@ featuretest = np.float32(hkl.load("/vol/ccnlab-scratch1/hugo/ridge/PCAtestl"+
 
 
 
-"""
-featuretrain = np.concatenate((featuretrain,loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['train']), axis=1)#Fi.get_node('/train'))
-featuretest = np.concatenate((featuretest, loadmat("/vol/ccnlab-scratch1/hugo/vim2/results/errl"+str(layer)+".mat")['test']), axis=1)
-"""
 train_frames = featuretrain.shape[0]
 
 
 
 test_frames = featuretest.shape[0]
-"""
-for i in range(train_frames):
-    for j in range(featuretrain.shape[1]):
-        if np.isnan(featuretrain[i,j]):
-            featuretrain[i,j] = 0
-        if np.isinf(featuretrain[i,j]):
-            featuretrain[i,j] = 1
 
-for i in range(test_frames):
-    for j in range(featuretest.shape[1]):
-        if np.isnan(featuretest[i,j]):
-            featuretest[i,j] = 0
-        if np.isinf(featuretest[i,j]):
-            featuretest[i,j] = 1
-"""
+
+
+
+
 print "Storing pixel values in feature vector"
 
 

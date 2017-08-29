@@ -94,19 +94,37 @@ print "Resizing all images"
 print featuretrain.shape
 print featuretest.shape
 
+###chekc nans
+def checknans(array):
+    #int, 2darray checknans(2darray)
+    #replaces nans and infs in 2d array with 0
+    count =0
+    for i in range(array.shape[0]):
+        for j in range(array.shape[1]):
+            if np.isnan(array[i,j]) or np.isinf(array[i,j]):
+                array[i,j] = 0
+                count +=1
+    return count, array
+
+###abstract PCA
 
 
+def pcafts(featuretrain, featuretest):
+    
+    pca = PCA(n_components=10000)
+    count, pcable = checknans(zscore(np.concatenate((featuretrain,featuretest),axis=0),axis=1))
+    print count
+    pcad = pca.fit_transform(pcable)
+    featuretrain=pcad[:7200]
+    featuretest=pcad[7200:]
+    print np.sum(pca.explained_variance_ratio_)
+    pcad = 0
+    pca=0
+    pcable=0
+    gc.collect()
+    return featuretrain, featuretest
 
-pca = PCA(n_components=10000)
-pcable = zscore(np.concatenate((featuretrain,featuretest),axis=0))
-pcad = pca.fit_transform(pcable)
-featuretrain=pcad[:7200]
-featuretest=pcad[7200:]
-print np.sum(pca.explained_variance_ratio_)
-pcad = 0
-pca=0
-pcable=0
-gc.collect()
+featuretrain, featuretest = pcafts(featuretrain, featuretest)
 
 # choose ROI
 
@@ -151,7 +169,7 @@ resptest = 0
 resptrain = 0
 
 print "Concatenating..."
-
+print featuretrain.shape
 def rollcat(fts, min_delay):
     #ndarray(frames, 3*nfeats) rollcat(ndarray(frames,nfeats)
     """
@@ -164,6 +182,8 @@ def rollcat(fts, min_delay):
 
 RStim = rollcat(featuretrain,min_delay)
 featuretrain = 0
+
+print RStim.shape
 
 PStim = rollcat(featuretest, min_delay)
 
@@ -181,15 +201,15 @@ featuretest = 0
 # # PStim = zscore(zscore(PStim, axis =1), axis=0)[5:-5]
 # PStim = (PStim - Rstimmu)/Rstimstdev
 # # Rresp = zscore(zscore(Rresp, axis=1), axis=0)[5:-5]
-# Rrespmu = np.mean(np.concatenate((Rresp, Presp), axis=0), axis=0)
-# Rresptdev = np.std(np.concatenate((Rresp, Presp), axis=0), axis=0)
-# for i in range(Rresptdev.shape[0]):
-#     if Rresptdev[i] == 0 or np.isnan(Rresptdev[i]):
-#         print i
-#         Rresptdev[i] = 1
-# Rresp = ((Rresp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
-# # Presp = zscore(zscore(Presp, axis=1), axis=0)[5:-5]
-# Presp =((Presp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
+Rrespmu = np.mean(np.concatenate((Rresp, Presp), axis=0), axis=0)
+Rresptdev = np.std(np.concatenate((Rresp, Presp), axis=0), axis=0)
+for i in range(Rresptdev.shape[0]):
+    if Rresptdev[i] == 0 or np.isnan(Rresptdev[i]):
+        print i
+        Rresptdev[i] = 1
+Rresp = ((Rresp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
+# Presp = zscore(zscore(Presp, axis=1), axis=0)[5:-5]
+Presp =((Presp - Rrespmu)/Rresptdev)[min_delay+2:-(min_delay+2)]
 
 alphas = np.logspace(20,0,200)
 
